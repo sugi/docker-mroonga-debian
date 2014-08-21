@@ -1,0 +1,34 @@
+#!/bin/sh
+DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND
+
+if [ ! -d /var/lib/mysql/mysql ]; then
+  echo "Mysql database is missing, run initial configure..."
+  /var/lib/dpkg/info/mysql-server-5.5.postinst configure
+  echo "configure done"
+fi
+
+echo "Starting mysqld to check environment"
+/etc/init.d/mysql start
+
+if !(echo 'show engines' | mysql -u root | grep -q 'mroonga'); then
+  echo -n "Installing Mroonga plugin..."
+  mysql -u root << EOS
+    INSTALL PLUGIN mroonga SONAME 'ha_mroonga.so';
+    CREATE FUNCTION last_insert_grn_id RETURNS INTEGER SONAME 'ha_mroonga.so';
+    CREATE FUNCTION mroonga_snippet RETURNS STRING SONAME 'ha_mroonga.so';
+    CREATE FUNCTION mroonga_command RETURNS STRING SONAME 'ha_mroonga.so';
+    CREATE FUNCTION mroonga_escape RETURNS STRING SONAME 'ha_mroonga.so';
+EOS
+  echo "done"
+else
+  echo "Mroonga plugin is already installed."
+fi 
+
+echo "Waiting mysqld stop..."
+/etc/init.d/mysql stop 2>&1
+while /usr/bin/mysqladmin status > /dev/null 2> /dev/null; do
+  sleep 1
+done
+echo "OK, now start mysqld again"
+exec /usr/bin/mysqld_safe
