@@ -9,5 +9,6 @@ RUN apt-get update
 RUN apt-get -y --allow-unauthenticated install groonga-keyring; apt-get update
 RUN apt-get -y install mysql-server-mroonga
 ADD init /
+ADD etc/ etc/
 
 CMD ["/init"]
