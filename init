@@ -1,6 +1,19 @@
-#!/bin/sh
+#!/bin/bash
 DEBIAN_FRONTEND=noninteractive
 export DEBIAN_FRONTEND
+
+function stop() {
+  pidfile="`mysqld --help --verbose 2>/dev/null |egrep '^pid-file' | awk '{print $2}'`"
+  echo "Signal recieved, shutting down mysqld."
+  test -f "$pidfile" || return
+  kill -TERM `< $pidfile`
+}
+
+trap stop TERM INT QUIT
+
+if [ -d /var/run/mysqld -a `stat -c %U /var/run/mysqld` != 'mysql' ]; then
+  chown mysql /var/run/mysqld
+fi
 
 if [ ! -d /var/lib/mysql/mysql ]; then
   echo "Mysql database is missing, run initial configure..."
@@ -31,4 +44,5 @@ while /usr/bin/mysqladmin status > /dev/null 2> /dev/null; do
   sleep 1
 done
 echo "OK, now start mysqld again"
-exec /usr/bin/mysqld_safe
+/usr/bin/mysqld_safe --skip-syslog &
+wait
