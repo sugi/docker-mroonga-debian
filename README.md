@@ -31,7 +31,7 @@ In this case, you can connect via unix domain socket;
 
     mysql --socket=/data/mroonga/run/mysqld.sock -u root
 
-## Override settings
+### Override settings
 
 In addtion, you can override MySQL setting with
 inserting your setting files at runtime;
