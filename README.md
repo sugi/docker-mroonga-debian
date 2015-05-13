@@ -1,7 +1,7 @@
-docker-mroonga-debian-wheezy
+docker-mroonga-debian
 ============================
 
-Docker image of [Mroonga](http://mroonga.org/) on Debian wheezy.
+Docker image of [Mroonga](http://mroonga.org/) on Debian.
 
 How to run
 ----------
@@ -11,6 +11,8 @@ How to run
     $ docker run --name mroonga -p 3306 sugi/mroonga
 
 Then connect by root without password.
+
+To choose distribution, use tag wheezy or jessie.
 
 ### Mmount data directories
 
